@@ -1,0 +1,51 @@
+#include <stdio.h>
+#include <mpi.h>
+
+#define SIZE 6
+
+int main(int argc, char* argv[]) {
+    int rank, size;
+    int A[SIZE][SIZE], B[SIZE][SIZE];
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    if (rank == 0) {
+        // Initialize the matrix
+        printf("Original Matrix:\n");
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                A[i][j] = i * SIZE + j + 1;
+                printf("%3d ", A[i][j]);
+            }
+            printf("\n");
+        }
+    }
+
+    // Broadcast matrix A to all processes
+    MPI_Bcast(A, SIZE * SIZE, MPI_INT, 0, MPI_COMM_WORLD);
+
+    // Perform matrix transposition
+    for (int i = rank; i < SIZE; i += size) {
+        for (int j = 0; j < SIZE; j++) {
+            B[j][i] = A[i][j];
+        }
+    }
+
+    // Gather transposed matrix B
+    MPI_Gather(B, SIZE * SIZE / size, MPI_INT, B, SIZE * SIZE / size, MPI_INT, 0, MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        printf("\nTransposed Matrix:\n");
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                printf("%3d ", B[i][j]);
+            }
+            printf("\n");
+        }
+    }
+
+    MPI_Finalize();
+    return 0;
+}
