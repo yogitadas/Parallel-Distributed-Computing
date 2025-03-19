@@ -1,0 +1,64 @@
+#include <stdio.h>
+#include <mpi.h>
+#include <math.h>
+
+#define SIZE 10
+#define MAX_ITER 1000
+#define EPSILON 1e-5
+
+int main(int argc, char *argv[]) {
+    int rank, size;
+    double grid[SIZE][SIZE], new_grid[SIZE][SIZE];
+    double diff, global_diff;
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    // Initialize the grid
+    for (int i = 0; i < SIZE; i++) {
+        for (int j = 0; j < SIZE; j++) {
+            if (i == 0 || i == SIZE - 1 || j == 0 || j == SIZE - 1) {
+                grid[i][j] = 100.0;  // Boundary
+            } else {
+                grid[i][j] = 0.0;
+            }
+            new_grid[i][j] = grid[i][j];
+        }
+    }
+
+    int start = rank * SIZE / size;
+    int end = (rank + 1) * SIZE / size;
+
+    for (int iter = 0; iter < MAX_ITER; iter++) {
+        diff = 0.0;
+
+        // Update heat distribution
+        for (int i = start + 1; i < end - 1; i++) {
+            for (int j = 1; j < SIZE - 1; j++) {
+                new_grid[i][j] = 0.25 * (grid[i + 1][j] + grid[i - 1][j] + grid[i][j + 1] + grid[i][j - 1]);
+                diff = fmax(diff, fabs(new_grid[i][j] - grid[i][j]));
+            }
+        }
+
+        MPI_Allreduce(&diff, &global_diff, 1, MPI_DOUBLE, MPI_MAX, MPI_COMM_WORLD);
+
+        // Update the grid
+        for (int i = start; i < end; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                grid[i][j] = new_grid[i][j];
+            }
+        }
+
+        if (global_diff < EPSILON) {
+            break;
+        }
+    }
+
+    if (rank == 0) {
+        printf("Heat distribution completed.\n");
+    }
+
+    MPI_Finalize();
+    return 0;
+}
