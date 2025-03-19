@@ -1,0 +1,31 @@
+#include <stdio.h>
+#include <mpi.h>
+
+#define SIZE 10
+
+int main(int argc, char *argv[]) {
+    int rank, size, local_dot = 0, global_dot = 0;
+    int A[SIZE], B[SIZE];
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    for (int i = 0; i < SIZE; i++) {
+        A[i] = i + 1;
+        B[i] = i + 1;
+    }
+
+    for (int i = rank; i < SIZE; i += size) {
+        local_dot += A[i] * B[i];
+    }
+
+    MPI_Reduce(&local_dot, &global_dot, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        printf("Dot product: %d\n", global_dot);
+    }
+
+    MPI_Finalize();
+    return 0;
+}
