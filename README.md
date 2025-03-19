@@ -1,7 +1,15 @@
 # Parallel-Distributed-Computing
 Parallel and Distributed Computing - Assignments 1, 2 and 3
-
 This repository contains the solutions for Assignments 1, 2 and 3 of the Parallel and Distributed Computing (UCS645).
+
+Assignment 1 - Questions
+1. Hello World
+2. MPI Send / Receive Program
+3. MPI Ping Pong
+4. Ring Program
+5. Querying MPI_Status Structure
+6. MPI_Probe to find out the message size
+7. Random Walk with MPI
 
 Assignment 2 - Questions
 1. Estimate the value of Pi using the Monte Carlo method and demonstrate basic MPI functions.
