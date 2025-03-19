@@ -1,5 +1,6 @@
 # Parallel-Distributed-Computing
 Parallel and Distributed Computing - Assignments 1, 2 and 3
+
 This repository contains the solutions for Assignments 2 and 3 of the Parallel and Distributed Computing (UCS645).
 
 Assignment 2 - Questions
